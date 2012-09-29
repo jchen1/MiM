@@ -9,6 +9,7 @@ function start(response) {
 }
 
 function pull(response, tag) {
+	if (typeof tag == "undefined") tag = 'dog';
 
 	//Callback because wtf node
 	function httpCallback(res, response)
@@ -31,7 +32,7 @@ function pull(response, tag) {
 		console.log("Got response: " + res.statusCode);	
 	}
 
-	tag = tag.substr(1, tag.length - 2);
+	tag = tag.replace(/"/g, '');
 
 	var options = {
 		host: 'api.tumblr.com',
