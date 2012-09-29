@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Bootstrap, from Twitter</title>
+    <title>Mosaics in Mosaics</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -13,6 +13,34 @@
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        background: url(../assets/img/retina_wood.png);
+      }
+      .navbar-inverse .navbar-inner {
+        background: -webkit-linear-gradient(top, white, #aaa);
+        background: -moz-linear-gradient(top, white, #aaa);
+        background: -o-linear-gradient(top, white, #aaa);
+        border: none;
+      }
+      .navbar-inverse .nav .active > a, .navbar-inverse .nav .active > a:hover, .navbar-inverse .nav .active > a:focus {
+        background: -webkit-linear-gradient(top, #aaa, #555);
+        color: #fff;
+      }
+
+      .navbar-inverse .brand, .navbar-inverse .nav > li > a {
+        color: #555;
+      }
+      .navbar-inverse .brand:hover, .navbar-inverse .nav > li > a:hover {
+        color: #000;
+      }
+      #searchbox {
+        height: 30px;
+        width: 70%;
+        font-size: 25px;
+      }
+      #searchbutton {
+        width: 20%;
+        height: 40px;
+        font-size: 25px;
       }
     </style>
     <link href="../assets/css/bootstrap-responsive.css" rel="stylesheet">
@@ -40,7 +68,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">Project name</a>
+          <a class="brand" href="#">Mosaics in Mosaics</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
@@ -52,18 +80,15 @@
       </div>
     </div>
 
-    <div class="container-fluid">
-
-      <h1>Mosaics in Mosaics</h1>
-      <div class="row-fluid">
-        <div class="span4">
-          <h1>Do stuff</h2>
-          <button class="btn btn-large btn-block btn-primary" type="button">Get started now!</button>
-        </div>
-        <div class="span8">
-          <h1>Here are your images</h1>
-          <img src="http://placehold.it/600x400" />
-        </div>
+    <div class="container">
+      <div class="row">
+        <form class="form-search" style="text-align: center;">
+          <input type="text" class="input-medium search-query" id="searchbox" />
+          <button type="submit" class="btn btn-primary" id="searchbutton">Search</button>
+        </form>
+      </div>
+      <div class="row">
+        <img src="http://lorempixel.com/1200/500/" />
       </div>
 
     </div> <!-- /container -->
