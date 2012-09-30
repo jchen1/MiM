@@ -19,22 +19,24 @@ var Photo = function() {
 
 	self.initTagged = function(tag) {
 		var photo = {tag:tag, width:0, height:0, data:[], t_index:0, timestamp:0, tags:[], url:'', post_url:'', tiles:[]};
-		console.log("newTaggedPhoto");
+		//console.log("newTaggedPhoto");
 		self.emit("newTaggedPhoto", photo, 1);
 	}
-/*
+
 	self.initURL = function(link) {
-		var photo = {tag:'', timestamp:0, tags:[], url:'', post_url:link, tiles:[]};
+		var photo = {tag:'', t_index:0, width:0, height:0, timestamp:0, tags:[], url:'', post_url:link, tiles:[]};
 
 		var host = photo.post_url.replace('http://', '').split('/')[0];
 		var pathName = url.parse(photo.post_url).pathname;
-		var id = pathName.split('/')[2];;
+		var id = pathName.split('/')[2];
 
-		console.log(host);
+		var path = '/v2/blog/' + host + '/posts?id=' + id + '&api_key=' + key;
+
+		console.log(path);
 
 		var options = {
 			host: 'api.tumblr.com',
-			path: 'v2/blog/' + host + '/posts?id=' + id + '&api_key=' + key
+			path: '/v2/blog/' + host + '/posts?id=' + id + '&api_key=' + key
 		};
 
 		var req = http.get(options, function(res)
@@ -48,16 +50,19 @@ var Photo = function() {
 			res.on('end', function()
 			{
 				var JSONData = JSON.parse(pageData);
-				if (JSONData.response.posts[0].type === 'photo')
+				if (JSONData.response.posts[0].type === 'photo' && JSONData.response.posts[0].photos[0].original_size.url.indexOf('.gif') == -1)
 				{
 					photo.url = JSONData.response.posts[0].photos[0].original_size.url;
 					photo.tags = JSONData.response.posts[0].photos[0].tags;
-					photo.tag = (photo.tags.length > 0 ? photo.tags[0] : '');
+					photo.tag = (typeof JSONData.response.posts[0].photos[0].tags != 'undefined' ? JSONData.response.posts[0].photo[0].tags[0] :
+						typeof JSONData.response.posts[0].photos[0].featured_in_tag != 'undefined' ? JSONData.response.posts[0].photos[0].featured_in_tag[0] : 'dog');
 					photo.post_url = JSONData.response.posts[0].photos[0].post_url;
 					photo.timestamp = JSONData.response.posts[0].photos[0].timestamp;
+					photo.width = JSONData.response.posts[0].photos[0].original_size.width;
+					photo.height = JSONData.response.posts[0].photos[0].original_size.height;
 					photo.data = []; //hi rolando
-					console.log("parsedBig 20");
-					self.emit("parsedBig", photo, 20);
+					//console.log("parsedBig 20");
+					self.emit("s_parsedBig", photo);
 				}
 				else
 				{
@@ -66,9 +71,9 @@ var Photo = function() {
 			});
 		});
 
-		console.log("newURLPhoto");
-		//self.emit("newURLPhoto", photo);
-	}*/
+		//console.log("newURLPhoto");
+		//self.emit("s_pulledBig", photo);
+	}
 
 	var _pull = function(photo, limit) {	
 		if (typeof photo.tag == "undefined") photo.tag = 'dog';
@@ -92,12 +97,12 @@ var Photo = function() {
 			{
 				if (limit == 1)
 				{
-					console.log("s_pulledBig");
+					//console.log("s_pulledBig");
 					self.emit("s_pulledBig", photo, JSON.parse(pageData));				
 				}
 				else 
 				{
-					console.log("s_pulledSmall");
+					//console.log("s_pulledSmall");
 					self.emit("s_pulledSmall", photo, JSON.parse(pageData));					
 				}
 			})
@@ -120,14 +125,14 @@ var Photo = function() {
 			photo.data = []; //hi rolando
 			photo.width = json.photos[0].original_size.width;
 			photo.height = json.photos[0].original_size.height;
-			console.log("parsedBig 20");
+			//console.log("parsedBig 20");
 			self.emit("s_parsedBig", photo);
-			console.log(photo.data.length);
+			//console.log(photo.data.length);
 		}
 		else
 		{
 			photo.timestamp = json.timestamp - 1;
-			console.log("parsedBig 1");
+			//console.log("parsedBig 1");
 			self.emit("f_parsedBig", photo, 1);
 		}
 	}
@@ -156,46 +161,46 @@ var Photo = function() {
 		});
 
 
-req.on('error', function(e) {
-	console.log('error: ' + e.message);
-});
-}
+	req.on('error', function(e) {
+		console.log('error: ' + e.message);
+	});
+	}
 
-var _storeBigImage = function(photo, pixels) {
-	photo.data = pixels;
-	self.emit("storedBigImage", photo, 20);
-}
+	var _storeBigImage = function(photo, pixels) {
+		photo.data = pixels;
+		self.emit("storedBigImage", photo, 20);
+	}
 
-var _parseSmall = function(photo, data) {
-	for (i = 0; i < data.response.length; i++)
-	{
-		if (data.response[i].type === 'photo' && data.response[i].photos[0].original_size.url.indexOf('.gif') == -1)
+	var _parseSmall = function(photo, data) {
+		for (i = 0; i < data.response.length; i++)
 		{
-			var simpic = {};
-			simpic.tags = data.response[i].tags;
-			simpic.post_url = data.response[i].post_url;
-			if (simpic.post_url === photo.post_url) continue;
-			simpic.timestamp = data.response[i].timestamp;
-			var min = 0;
-			for (j = 1; j < data.response[i].photos[0].alt_sizes.length; j++)
+			if (data.response[i].type === 'photo' && data.response[i].photos[0].original_size.url.indexOf('.gif') == -1)
 			{
-				if (data.response[i].photos[0].alt_sizes[j].width == 75 &&
-					data.response[i].photos[0].alt_sizes[j].height == 75) min = j;
-			}
-			simpic.url = data.response[i].photos[0].alt_sizes[min].url;
-			simpic.width = data.response[i].photos[0].alt_sizes[min].width;
-			simpic.height = data.response[i].photos[0].alt_sizes[min].height;
-			simpic.data = []; //hi rolando
-			photo.tiles[photo.tiles.length] = simpic;
+				var simpic = {};
+				simpic.tags = data.response[i].tags;
+				simpic.post_url = data.response[i].post_url;
+				if (simpic.post_url === photo.post_url) continue;
+				simpic.timestamp = data.response[i].timestamp;
+				var min = 0;
+				for (j = 1; j < data.response[i].photos[0].alt_sizes.length; j++)
+				{
+					if (data.response[i].photos[0].alt_sizes[j].width == 75 &&
+						data.response[i].photos[0].alt_sizes[j].height == 75) min = j;
+				}
+				simpic.url = data.response[i].photos[0].alt_sizes[min].url;
+				simpic.width = data.response[i].photos[0].alt_sizes[min].width;
+				simpic.height = data.response[i].photos[0].alt_sizes[min].height;
+				simpic.data = []; //hi rolando
+				photo.tiles[photo.tiles.length] = simpic;
 			}
 		}
-		console.log("parsedSmall " + photo.tiles.length);
+		//console.log("parsedSmall " + photo.tiles.length);
 		self.emit("parsedSmall", photo);
-		
+			
 	}
 
 	var _waitforpaths = function(photo) {
-		console.log("mosaiced");
+		//console.log("mosaiced");
 		if (photo.tiles.length < 400 && lastlength != photo.tiles.length)
 		{
 			lastlength = photo.tiles.length;
@@ -243,7 +248,7 @@ var _parseSmall = function(photo, data) {
 
 	var _storeSmallImage = function(photo, pixels) {
 		photo.tiles[photo.t_index].data = pixels;
-		console.log('stored index ' + photo.t_index + ' with size ' + photo.tiles[photo.t_index].data.data.length);
+		//if (!(photo.t_index % 100)) console.log('stored index ' + photo.t_index + ' with size ' + photo.tiles[photo.t_index].data.data.length);
 		photo.t_index++;
 
 		self.emit("downloadSmall", photo);	
