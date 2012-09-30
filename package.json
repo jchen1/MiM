@@ -4,12 +4,13 @@
   "scripts": {
     "start": "index.js"
   },
-  "version": "0.0.1-29",
+  "version": "0.0.1-30",
   "engines": {
     "node": "0.8.x"
   },
   "dependencies": {
     "connect": "2.5.x",
-    "node-static": "0.6.x"
+    "node-static": "0.6.x",
+    "express": ">= 3.x"
   }
 }

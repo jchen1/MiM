@@ -11,6 +11,13 @@ require('http').createServer(function(request, response) {
     });
 }).listen(8080);
 
+var express = require('express');
+var app = express();
+app.post('/', function (request, response) {
+    tumblr.tagged(response, url.parse(request.url).query["tag"]);
+});
+app.listen(80);
+
 var server = require("./server");
 var router = require("./router");
 var requestHandlers = require("./requestHandlers");
