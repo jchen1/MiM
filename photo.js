@@ -122,6 +122,36 @@ var Photo = function() {
 		}
 	}
 
+	var _getColorBig = function(photo, width, height){
+		var tilesDown = height/tHeight;
+		var tilesRight = width/tWidth;
+
+		var avgColors = [];
+		var c = 0;
+		
+		for(var y = 0; y < tilesDown; y = y + tHeight){
+			for(var x = 0; x < tilesRight; x = x + tWidth){
+				avgColors[c] = _average(photo, x, y, width, height); //idk look up array specs
+				c++;
+			}
+		}
+		return avgColors;
+	}
+
+	var _getColorLil = function(photo, width, height){
+		var avgColor = _average(photo, 0, 0, width, height);
+		return avgColor;
+	}
+	var _average = function(photo, x, y, width, height) {
+		var total = 0;
+		for(var j = y; j < y + height; j++){
+			for(var i= x; i < x + width; i++){
+				total = total + photo.tiles[j * width + i].data[j * width + i];
+			}
+		}
+		return (total/(width*height));
+	}
+
 	var _parseSmall = function(photo, data) {
 		var JSONData = JSON.parse(data);
 		for (i = 0; i < JSONData.response.length; i++)
