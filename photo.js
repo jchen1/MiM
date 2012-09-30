@@ -3,7 +3,10 @@ var http = require("http");
 var util = require("util");
 var events = require("events");
 var url = require("url");
-var querystring = require("querystring");
+var gm = require('gm');
+var PNG = require('png-js');
+var fs = require('fs');
+var easyimg = require('easyimage');
 
 var Photo = function() {
 	var self = this;
@@ -11,7 +14,7 @@ var Photo = function() {
 	events.EventEmitter.call(self);
 
 	self.initTagged = function(tag) {
-		var photo = {tag:tag, data:[], timestamp:0, tags:[], url:'', post_url:'', tiles:[]};
+		var photo = {tag:tag, data:[], t_index:0, timestamp:0, tags:[], url:'', post_url:'', tiles:[]};
 		console.log("newTaggedPhoto");
 		self.emit("newTaggedPhoto", photo, 1);
 	}
@@ -72,6 +75,7 @@ var Photo = function() {
 			host: 'api.tumblr.com',
 			path: '/v2/tagged?tag=' + photo.tag + '&api_key=' + key + '&before=' + (photo.tiles.length === 0 ? photo.timestamp: photo.tiles[photo.tiles.length - 1].timestamp) + '&limit=' + limit
 		};
+
 		var req = http.get(options, function(res)
 		{
 			var pageData = '';
@@ -85,12 +89,12 @@ var Photo = function() {
 				if (limit == 1)
 				{
 					console.log("s_pulledBig");
-					self.emit("s_pulledBig", photo, pageData);				
+					self.emit("s_pulledBig", photo, JSON.parse(pageData));				
 				}
 				else 
 				{
 					console.log("s_pulledSmall");
-					self.emit("s_pulledSmall", photo, pageData);					
+					self.emit("s_pulledSmall", photo, JSON.parse(pageData));					
 				}
 			})
 		});
@@ -102,9 +106,8 @@ var Photo = function() {
 	}
 
 	var _parseBig = function(photo, data) {
-		var JSONData = JSON.parse(data);
-		var json = JSONData.response[0];
-		if (json.type === 'photo')
+		var json = data.response[0];
+		if (json.type === 'photo' && json.photos[0].original_size.url.indexOf('.gif') == -1)
 		{
 			photo.url = json.photos[0].original_size.url;
 			photo.tags = json.tags;
@@ -112,34 +115,76 @@ var Photo = function() {
 			photo.timestamp = json.timestamp;
 			photo.data = []; //hi rolando
 			console.log("parsedBig 20");
-			self.emit("parsedBig", photo, 20);
+			self.emit("s_parsedBig", photo);
+			console.log(photo.data.length);
 		}
 		else
 		{
 			photo.timestamp = json.timestamp - 1;
 			console.log("parsedBig 1");
-			self.emit("parsedBig", photo, 1);
+			self.emit("f_parsedBig", photo, 1);
 		}
 	}
 
-	var _parseSmall = function(photo, data) {
-		var JSONData = JSON.parse(data);
-		for (i = 0; i < JSONData.response.length; i++)
+	var _downloadBig = function(photo) {
+		photo.url = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png';
+
+		var fileName = 'tmp/'+url.parse(photo.url).pathname.split('/').pop();
+		
+		var req = http.get(photo.url, function(res)
 		{
-			if (JSONData.response[i].type === 'photo')
+			var imgData = '';
+			res.setEncoding('binary');
+			res.on('data', function(chunk)
+			{
+				imgData += chunk;
+			});
+			res.on('end', function()
+			{
+				fs.writeFileSync(fileName, imgData, 'binary');
+				gm(fileName).size(function(err, size)
+				{
+					try {
+						PNG.decode(fileName, function(pixels)
+						{
+							self.emit("downloadedBig", photo, pixels);
+							//console.log(photo.data.length);
+						});
+					} catch (err) {
+						console.log('you fucked up: ' + err);
+					}
+				});
+			});
+		});
+
+
+		req.on('error', function(e) {
+			console.log('error: ' + e.message);
+		});
+	}
+
+	var _storeBigImage = function(photo, pixels) {
+		photo.data = pixels;
+		self.emit("storedBigImage", photo, 20);
+	}
+
+	var _parseSmall = function(photo, data) {
+		for (i = 0; i < data.response.length; i++)
+		{
+			if (data.response[i].type === 'photo' && data.response[i].photos[0].original_size.url.indexOf('.gif') == -1)
 			{
 				var simpic = {};
-				simpic.tags = JSONData.response[i].tags;
-				simpic.post_url = JSONData.response[i].post_url;
+				simpic.tags = data.response[i].tags;
+				simpic.post_url = data.response[i].post_url;
 				if (simpic.post_url === photo.post_url) continue;
-				simpic.timestamp = JSONData.response[i].timestamp;
+				simpic.timestamp = data.response[i].timestamp;
 				var min = 0;
-				for (j = 1; j < JSONData.response[i].photos[0].alt_sizes.length; j++)
+				for (j = 1; j < data.response[i].photos[0].alt_sizes.length; j++)
 				{
-					if (JSONData.response[i].photos[0].alt_sizes[j].width <
-						JSONData.response[i].photos[0].alt_sizes[j].width) min = j;
+					if (data.response[i].photos[0].alt_sizes[j].width <
+						data.response[i].photos[0].alt_sizes[j].width) min = j;
 				}
-				simpic.url = JSONData.response[i].photos[0].alt_sizes[min].url;
+				simpic.url = data.response[i].photos[0].alt_sizes[min].url;
 				simpic.data = []; //hi rolando
 				photo.tiles[photo.tiles.length] = simpic;
 			}
@@ -149,18 +194,72 @@ var Photo = function() {
 		
 	}
 
-	var _mosaic = function(photo) {
+	var _waitforpaths = function(photo) {
 		console.log("mosaiced");
-		if (photo.tiles.length < 400 && lastlength != photo.tiles.length)
+		if (photo.tiles.length < 30 && lastlength != photo.tiles.length)
 		{
 			lastlength = photo.tiles.length;
 			self.emit("moreTiles", photo, 20);
 		}
 		else
 		{
-			self.emit("mosaiced", photo);
+			self.emit("downloadSmall", photo);
+			//self.emit("mosaiced", photo);
 		}
 	}
+
+	var _downloadSmall = function(photo) {
+		if (photo.t_index >= photo.tiles.length) self.emit("downloadedSmall", photo);
+		var tile = photo.tiles[photo.t_index];
+		if (typeof tile == 'undefined'){
+			self.emit("downloadedSmall", photo);
+			return;
+		}
+		var fileName = 'tmp/' + url.parse(tile.url).pathname.split('/').pop();
+
+		var req = http.get(photo.tiles[photo.t_index].url, function(res)
+		{
+			var imgData = '';
+			res.setEncoding('binary');
+			res.on('data', function(chunk)
+			{
+				imgData += chunk;
+			});
+			res.on('end', function()
+			{
+				fs.writeFileSync(fileName, imgData, 'binary');
+				gm(fileName).size(function(err, size)
+				{
+					if (fileName.indexOf('.jpg') != -1)
+					{
+						easyimg.convert({src:fileName, dst:fileName.replace('.jpg', '.png'), quality:10});
+					}
+					try {
+						PNG.decode(fileName, function(pixels)
+						{
+							self.emit("storeSmallImage", photo, pixels);
+							//console.log(photo.data.length);
+						});
+					} catch (err) {
+						console.log('you fucked up: ' + err);
+					}
+				});
+			});
+		});
+
+
+		req.on('error', function(e) {
+			console.log('error: ' + e.message);
+		});
+	}
+
+	var _storeSmallImage = function(photo, pixels) {
+		photo.tiles[photo.t_index].data = pixels;
+		console.log('stored index ' + photo.t_index + ' with size ' + photo.tiles[photo.t_index].data.length);
+		photo.t_index++;
+		self.emit("downloadSmall", photo);	
+	}
+
 
 	var _success = function(photo) {
 		console.log("success");
@@ -170,11 +269,17 @@ var Photo = function() {
 	self.on("newURLPhoto", self.initTagged);
 	self.on("newTaggedPhoto", _pull);
 	self.on("s_pulledBig", _parseBig);
-	self.on("parsedBig", _pull);
+	self.on("s_parsedBig", _downloadBig);
+	self.on("f_parsedBig", _pull);
 	self.on("s_pulledSmall", _parseSmall);
-	self.on("parsedSmall", _mosaic);
+	self.on("parsedSmall", _waitforpaths);
 	self.on("moreTiles", _pull);
-	self.on("mosaiced", _success);
+	self.on("downloadedSmall", _success);
+	self.on("downloadedBig", _storeBigImage);
+	self.on("storedBigImage", _pull);
+
+	self.on("downloadSmall", _downloadSmall);
+	self.on("storeSmallImage", _storeSmallImage);
 
 }
 
