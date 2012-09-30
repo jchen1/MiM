@@ -36,56 +36,45 @@ function bigImageProcess(imageurl, callback){
 
     var theurl = http.createClient(80, host);
     var requestUrl = downloadfile;
-    sys.puts("Downloading file: " + filename);
-    sys.puts("Before download request");
+    console.log("Downloading file: " + filename);
+    console.log("Before download request");
     var request = theurl.request('GET', requestUrl, {"host": host});
     request.end();
 
-    var dlprogress = 0;
-
-
-//setInterval(function () {
-//    sys.puts("Download progress: " + dlprogress + " bytes");
-//}, 1000);
-
-//function (callback)
 
     var pixelbuffer = null;
     request.addListener('response', function (response) {
 	response.setEncoding('binary')
-	sys.puts("File size: " + response.headers['content-length'] + " bytes.")
+	console.log("File size: " + response.headers['content-length'] + " bytes.")
 	var body = '';
-	response.addListener('data', function (chunk) {
-            dlprogress += chunk.length;
-            body += chunk;
+	response.on('data', function (chunk) {
+        body += chunk;
 	});
-	response.addListener("end", function() {
-            fs.writeFileSync(filename, body, 'binary');
-            sys.puts("Download Complete");
-	    sys.puts(filename);
+	response.on("end", function() {
+        fs.writeFileSync(filename, body, 'binary');
+        console.log("Download Complete");
+	    console.log(filename);
 	    gm(filename).size(function (err,size){
-		console.log(err);
-		console.log(size.width);
-		console.log(size.height);
-		gm(filename)
-		    .scale(size.width/2, size.height/2)
-		    .write('bigImages/largeMosaic.png', function (err){
+			console.log(err);
 			console.log(size.width);
-			try {
-			    PNG.decode(filename, function(pixels){
-				pixelbuffer = pixels;
-				//for(var i = 0; i < size.width/2*size.height/2; i++){ unnecessary for loopzzz$$zz
-				//console.log(pixels[i]); unnecessarrryyyyyy
-				callback(null, pixels); //<<---- that shit returns the pixel array of the big image
-				});
-		    }
-			   catch( err ) {
-			       console.log('error: '+err)
-			   }
-			  });
-			     });
-			    });
-		       });
+			console.log(size.height);
+			gm(filename)
+		    	.scale(size.width/2, size.height/2)
+		    	.write('bigImages/largeMosaic.png', function (err){
+					console.log(size.width);
+					try {
+			    		PNG.decode(filename, function(pixels){
+							pixelbuffer = pixels;
+							callback(null, pixels); //<<---- that shit returns the pixel array of the big image
+						});
+		    		}
+			   		catch( err ) {
+			    		console.log('error: ' + err)
+			   		}
+			  	});
+			});
+		});
+	});
 }
 //end big image process
 
@@ -98,8 +87,8 @@ function smallImageProcess(imageurl, callback){
 
     var theurl = http.createClient(80, host);
     var requestUrl = downloadfile;
-    sys.puts("Downloading file: " + filename);
-    sys.puts("Before download request");
+    console.log("Downloading file: " + filename);
+    console.log("Before download request");
     var request = theurl.request('GET', requestUrl, {"host": host});
     request.end();
 
@@ -107,7 +96,7 @@ function smallImageProcess(imageurl, callback){
 
 
 //setInterval(function () {
-//    sys.puts("Download progress: " + dlprogress + " bytes");
+//    console.log("Download progress: " + dlprogress + " bytes");
 //}, 1000);
 
 //function (callback)
@@ -115,7 +104,7 @@ function smallImageProcess(imageurl, callback){
     var pixelbuffer = null;
     request.addListener('response', function (response) {
 	response.setEncoding('binary')
-	sys.puts("File size: " + response.headers['content-length'] + " bytes.")
+	console.log("File size: " + response.headers['content-length'] + " bytes.")
 	var body = '';
 	response.addListener('data', function (chunk) {
             dlprogress += chunk.length;
@@ -123,8 +112,8 @@ function smallImageProcess(imageurl, callback){
 	});
 	response.addListener("end", function() {
             fs.writeFileSync(filename, body, 'binary');
-            sys.puts("Download Complete");
-	    sys.puts(filename);
+            console.log("Download Complete");
+	    console.log(filename);
 	    gm(filename).size(function (err,size){
 		console.log(err);
 		console.log(size.width);
