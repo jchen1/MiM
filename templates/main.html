@@ -21,10 +21,75 @@
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="../favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+
+	<script type="text/javascript">
+	var rows = 20;
+	var columns = 20;
+	var tWidth = 25; // pixels, tile width
+	var tHeight = 25; // pixels, tile height
+	var width = tWidth * columns;
+	var height = tHeight * rows;
+	var images = new Array(rows * columns);
+	var prev_i = 0;
+	var prev_j = 0;
+
+        function init(width, height, tileWidth, tileHeight, imgArray) {
+                this.rows = width / tileWidth;
+                this.columns = height / tileHeight;
+                this.width = this.rows * tileWidth;
+                this.height = this.columns * tileHeight;
+                this.tWidth = tileWidth;
+                this.tHeight = tileHeight;
+                this.images = imgArray;
+        }
+
+	function getSource(i, j) {
+		return 'http://lorempixel.com/25/25/' + '?' + (columns*i+j);
+	}
+ 
+
+	function draw(i, j, ctx) {
+		images[columns*i+j] = new Image();
+		images[columns*i+j].src = getSource(i, j);
+		images[columns*i+j].onload = function() {
+			ctx.drawImage(images[columns*i+j], i * tWidth, j * tHeight, tWidth, tHeight);
+		}
+	}
+
+	function multidraw() {
+                var canvas = document.getElementById("mycanvas");
+		var ctx = canvas.getContext("2d");
+		for (var i = 0; i < columns; i++) {
+			for (var j = 0; j < rows; j++) {
+				draw(i, j, ctx);
+			}
+		}
+		canvas.width = width;
+		canvas.height = height;
+		canvas.onmousemove = function onmousemove(e) {
+			var ctx = canvas.getContext("2d");
+			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+			var mx = e.pageX - canvas.offsetLeft;
+			var my = e.pageY - canvas.offsetTop;
+			var i = Math.floor(mx/tWidth);
+			var j = Math.floor(my/tHeight);
+			if (prev_i != i || prev_j != j) {
+				ctx.drawImage(images[columns*prev_i+prev_j], prev_i * tWidth, prev_j * tHeight, tWidth, tHeight);
+				ctx.fillRect(tWidth*i, tHeight*j, tWidth, tHeight);
+				prev_i = i;
+				prev_j = j;
+			}
+		}
+		canvas.onmouseout = function onmouseout(e) {
+			var ctx = canvas.getContext("2d");
+			var mx = e.pageX - canvas.offsetLeft;
+			var my = e.pageY - canvas.offsetTop;
+			var i = Math.floor(mx/tWidth);
+			var j = Math.floor(my/tHeight);
+			ctx.drawImage(images[columns*prev_i+prev_j], prev_i * tWidth, prev_j * tHeight, tWidth, tHeight);
+		}
+	}
+	</script>
   </head>
 
   <body>
@@ -32,17 +97,10 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
           <a class="brand" href="/">Mozaic</a>
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-              <li><a href="#settings">Settings</a></li>
+              <li><a href="#about">i</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -51,12 +109,16 @@
 
     <div class="container">
       <div class="row">
-        <form class="form-search" style="text-align: center;" action="/" method="POST">
-          <input type="text" class="input-medium search-query" id="searchbox" placeholder="Search #tag or URL: ex. dogs" name="tag" />
+        <div class="instructions">
+          <label style="width: 70%; margin: auto;">Search by <b>tag</b> or <b>image link</b> below:</label>
+        </div>
+        <form class="form-search" style="text-align: center;" action="./tagged" method="GET">
+          <input type="text" class="input-medium search-query" id="searchbox" name="tag" placeholder="example: dogs" />
         </form>
       </div>
       <div class="row">
-        <img src="http://lorempixel.com/1200/500/" alt="image" id="bgimage" />
+        <canvas id="mycanvas"></canvas>
+        <script>multidraw()</script>
       </div>
 
     </div> <!-- /container -->

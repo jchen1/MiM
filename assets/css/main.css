@@ -33,21 +33,21 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.container .row .instructions > label {
+  line-height: 30px;
+}
+
 #searchbox {
-  height: 30px;
+  height: 25px;
   width: 70%;
-  font-size: 25px;
+  font-size: 15px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   -o-border-radius: 5px;
   border-radius: 5px;
 }
-#searchbutton {
-  width: 20%;
-  height: 40px;
-  font-size: 25px;
-}
-#bgimage {
+
+#mycanvas {
   margin: auto;
   display: block;
 }
