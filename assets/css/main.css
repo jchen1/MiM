@@ -30,8 +30,7 @@ body {
 }
 
 .navbar-inverse .brand:hover, .navbar-inverse .nav > li > a:hover {
-  color: #EEE;
-  text-shadow: 1px 1px 0px black;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 #searchbox {

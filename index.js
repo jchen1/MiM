@@ -1,7 +1,9 @@
 var static = require('node-static');
 var file = new(static.Server);
-
-require('http').createServer(function(request, response) {
+var express = require('express');
+var app = express();
+app.use(express.bodyParser());
+app.get(/^\/.*$/, function(request, response) {
     request.addListener('end', function() {
 	fileName = '.' + request.url;
 	if (fileName == './')
@@ -9,14 +11,11 @@ require('http').createServer(function(request, response) {
 	else if (fileName.substr(0, 8) == './assets')
 	    file.serve(request, response);
     });
-}).listen(8080);
-
-var express = require('express');
-var app = express();
-app.post('/', function (request, response) {
-    tumblr.tagged(response, url.parse(request.url).query["tag"]);
 });
-app.listen(80);
+app.post('/', function (request, response) {
+    tumblr.tagged(response, request.param("tag", null));
+});
+app.listen(8080);
 
 var server = require("./server");
 var router = require("./router");
