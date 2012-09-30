@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>Canvas test</title>
+	<script type="text/javascript">
+	var images = new Array(400);
+	function draw(i, j) {
+		var canvas = document.getElementById("mycanvas");
+		var ctx = canvas.getContext("2d");
+		images[20*i+j] = new Image();
+		images[20*i+j].src = 'http://lorempixel.com/75/75/' + '?' + (20*i+j);
+		images[20*i+j].onload = function() {
+			ctx.drawImage(images[20*i+j], i * 25, j * 25, 25, 25);
+		}
+	}
+
+	function multidraw() {
+		for (var i = 0; i < 20; i++) {
+			for (var j = 0; j < 20; j++) {
+				draw(i, j);
+			}
+		}
+	}
+	</script>
+</head>
+<body>
+	<canvas id="mycanvas" width="500" height="500" style="border: 6px solid black;"></canvas>
+	<script>multidraw()</script>
+</body>
+</html>
