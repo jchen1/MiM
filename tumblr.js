@@ -8,7 +8,7 @@ function tagged(response, tag) {
 	{
 		console.log("This shouldn't have worked... " + taggedphoto);
 		response.writeHead(200, {"Content-Type": "text/plain"});	
-		response.write(JSON.stringify(taggedphoto));
+		response.write(JSON.stringify(taggedphoto.tiles[0].data));
 		response.end();
 		
 	});
