@@ -74,11 +74,10 @@ function bigImageProcess(imageurl, callback){
 			try {
 			    PNG.decode(filename, function(pixels){
 				pixelbuffer = pixels;
-				    //for(var i = 0; i < size.width/2*size.height/2; i++){ unnecessary for loopzzz$$zz
+				//for(var i = 0; i < size.width/2*size.height/2; i++){ unnecessary for loopzzz$$zz
 				//console.log(pixels[i]); unnecessarrryyyyyy
 				callback(null, pixels); //<<---- that shit returns the pixel array of the big image
-			    }
-				      });
+				});
 		    }
 			   catch( err ) {
 			       console.log('error: '+err)
@@ -140,7 +139,6 @@ function smallImageProcess(imageurl, callback){
 				    //for(var i = 0; i < size.width/2*size.height/2; i++){
 				//console.log(pixels[i]);
 				callback(null, pixels);
-			    }
 				      });
 		    }
 			   catch( err ) {
