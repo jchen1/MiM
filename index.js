@@ -3,6 +3,7 @@ var file = new(static.Server);
 var express = require('express');
 var app = express();
 app.use(express.bodyParser());
+app.use(express.favicon("./favicon.ico"));
 app.get(/^\/.*$/, function(request, response) {
     request.addListener('end', function() {
 	fileName = '.' + request.url;
