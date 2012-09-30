@@ -7,6 +7,10 @@ var gm = require('gm');
 var PNG = require('png-js');
 var fs = require('fs');
 var easyimg = require('easyimage');
+var Canvas = require('canvas')
+	, s_canvas = new Canvas(25, 25)
+	, s_ctx = s_canvas.getContext('2d')
+  , Image = Canvas.Image;
 
 var Photo = function() {
 	var self = this;
@@ -14,7 +18,7 @@ var Photo = function() {
 	events.EventEmitter.call(self);
 
 	self.initTagged = function(tag) {
-		var photo = {tag:tag, data:[], t_index:0, timestamp:0, tags:[], url:'', post_url:'', tiles:[]};
+		var photo = {tag:tag, width:0, height:0, data:[], t_index:0, timestamp:0, tags:[], url:'', post_url:'', tiles:[]};
 		console.log("newTaggedPhoto");
 		self.emit("newTaggedPhoto", photo, 1);
 	}
@@ -114,6 +118,8 @@ var Photo = function() {
 			photo.post_url = json.post_url;
 			photo.timestamp = json.timestamp;
 			photo.data = []; //hi rolando
+			photo.width = json.photos[0].original_size.width;
+			photo.height = json.photos[0].original_size.height;
 			console.log("parsedBig 20");
 			self.emit("s_parsedBig", photo);
 			console.log(photo.data.length);
@@ -127,8 +133,6 @@ var Photo = function() {
 	}
 
 	var _downloadBig = function(photo) {
-		photo.url = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png';
-
 		var fileName = 'tmp/'+url.parse(photo.url).pathname.split('/').pop();
 		
 		var req = http.get(photo.url, function(res)
@@ -141,52 +145,48 @@ var Photo = function() {
 			});
 			res.on('end', function()
 			{
-				fs.writeFileSync(fileName, imgData, 'binary');
-				gm(fileName).size(function(err, size)
-				{
-					try {
-						PNG.decode(fileName, function(pixels)
-						{
-							self.emit("downloadedBig", photo, pixels);
-							//console.log(photo.data.length);
-						});
-					} catch (err) {
-						console.log('you fucked up: ' + err);
-					}
-				});
+				var img = new Image;
+				img.src = new Buffer(imgData, 'binary');
+				canvas = new Canvas(photo.width, photo.height);
+				canvas.getContext('2d').drawImage(img, 0, 0, photo.width, photo.height);
+				var pixels = canvas.getContext('2d').getImageData(0, 0, photo.width, photo.height);
+				self.emit("downloadedBig", photo, pixels);
+
 			});
 		});
 
 
-		req.on('error', function(e) {
-			console.log('error: ' + e.message);
-		});
-	}
+req.on('error', function(e) {
+	console.log('error: ' + e.message);
+});
+}
 
-	var _storeBigImage = function(photo, pixels) {
-		photo.data = pixels;
-		self.emit("storedBigImage", photo, 20);
-	}
+var _storeBigImage = function(photo, pixels) {
+	photo.data = pixels;
+	self.emit("storedBigImage", photo, 20);
+}
 
-	var _parseSmall = function(photo, data) {
-		for (i = 0; i < data.response.length; i++)
+var _parseSmall = function(photo, data) {
+	for (i = 0; i < data.response.length; i++)
+	{
+		if (data.response[i].type === 'photo' && data.response[i].photos[0].original_size.url.indexOf('.gif') == -1)
 		{
-			if (data.response[i].type === 'photo' && data.response[i].photos[0].original_size.url.indexOf('.gif') == -1)
+			var simpic = {};
+			simpic.tags = data.response[i].tags;
+			simpic.post_url = data.response[i].post_url;
+			if (simpic.post_url === photo.post_url) continue;
+			simpic.timestamp = data.response[i].timestamp;
+			var min = 0;
+			for (j = 1; j < data.response[i].photos[0].alt_sizes.length; j++)
 			{
-				var simpic = {};
-				simpic.tags = data.response[i].tags;
-				simpic.post_url = data.response[i].post_url;
-				if (simpic.post_url === photo.post_url) continue;
-				simpic.timestamp = data.response[i].timestamp;
-				var min = 0;
-				for (j = 1; j < data.response[i].photos[0].alt_sizes.length; j++)
-				{
-					if (data.response[i].photos[0].alt_sizes[j].width <
-						data.response[i].photos[0].alt_sizes[j].width) min = j;
-				}
-				simpic.url = data.response[i].photos[0].alt_sizes[min].url;
-				simpic.data = []; //hi rolando
-				photo.tiles[photo.tiles.length] = simpic;
+				if (data.response[i].photos[0].alt_sizes[j].width == 75 &&
+					data.response[i].photos[0].alt_sizes[j].height == 75) min = j;
+			}
+			simpic.url = data.response[i].photos[0].alt_sizes[min].url;
+			simpic.width = data.response[i].photos[0].alt_sizes[min].width;
+			simpic.height = data.response[i].photos[0].alt_sizes[min].height;
+			simpic.data = []; //hi rolando
+			photo.tiles[photo.tiles.length] = simpic;
 			}
 		}
 		console.log("parsedSmall " + photo.tiles.length);
@@ -196,7 +196,7 @@ var Photo = function() {
 
 	var _waitforpaths = function(photo) {
 		console.log("mosaiced");
-		if (photo.tiles.length < 30 && lastlength != photo.tiles.length)
+		if (photo.tiles.length < 400 && lastlength != photo.tiles.length)
 		{
 			lastlength = photo.tiles.length;
 			self.emit("moreTiles", photo, 20);
@@ -227,36 +227,25 @@ var Photo = function() {
 			});
 			res.on('end', function()
 			{
-				fs.writeFileSync(fileName, imgData, 'binary');
-				gm(fileName).size(function(err, size)
-				{
-					if (fileName.indexOf('.jpg') != -1)
-					{
-						easyimg.convert({src:fileName, dst:fileName.replace('.jpg', '.png'), quality:10});
-					}
-					try {
-						PNG.decode(fileName, function(pixels)
-						{
-							self.emit("storeSmallImage", photo, pixels);
-							//console.log(photo.data.length);
-						});
-					} catch (err) {
-						console.log('you fucked up: ' + err);
-					}
-				});
+				var img = new Image;
+				img.src = new Buffer(imgData, 'binary');
+				s_ctx.drawImage(img, 0, 0, 25, 25);
+				pixels = s_ctx.getImageData(0, 0, 25, 25);
+				self.emit("storeSmallImage", photo, pixels)
 			});
 		});
 
 
-		req.on('error', function(e) {
+	req.on('error', function(e) {
 			console.log('error: ' + e.message);
 		});
 	}
 
 	var _storeSmallImage = function(photo, pixels) {
 		photo.tiles[photo.t_index].data = pixels;
-		console.log('stored index ' + photo.t_index + ' with size ' + photo.tiles[photo.t_index].data.length);
+		console.log('stored index ' + photo.t_index + ' with size ' + photo.tiles[photo.t_index].data.data.length);
 		photo.t_index++;
+
 		self.emit("downloadSmall", photo);	
 	}
 
