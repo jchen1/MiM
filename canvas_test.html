@@ -50,6 +50,7 @@
 				prev_i = i;
 				prev_j = j;
 			}
+		}
 		canvas.onmouseout = function onmouseout(e) {
 			var ctx = canvas.getContext("2d");
 			var mx = e.pageX - canvas.offsetLeft;
@@ -57,7 +58,6 @@
 			var i = Math.floor(mx/tWidth);
 			var j = Math.floor(my/tHeight);
 			ctx.drawImage(images[columns*prev_i+prev_j], prev_i * tWidth, prev_j * tHeight, tWidth, tHeight);
-		}
 		}
 	}
 	</script>
