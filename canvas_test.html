@@ -4,42 +4,60 @@
 	<meta charset="UTF-8">
 	<title>Canvas test</title>
 	<script type="text/javascript">
-	var images = new Array(400);
-	var prev_i = 1;
-	var prev_j = 1;
+	var rows = 20;
+	var columns = 20;
+	var tWidth = 25; // pixels, tile width
+	var tHeight = 25; // pixels, tile height
+	var width = tWidth * columns;
+	var height = tHeight * rows;
+	var images = new Array(rows * columns);
+	var prev_i = 0;
+	var prev_j = 0;
+
+	function getSource(i, j) {
+		return 'http://lorempixel.com/25/25/' + '?' + (columns*i+j);
+	}
+
 	function draw(i, j) {
 		var canvas = document.getElementById("mycanvas");
 		var ctx = canvas.getContext("2d");
-		images[20*i+j] = new Image();
-		images[20*i+j].src = 'http://lorempixel.com/25/25/' + '?' + (20*i+j);
-		images[20*i+j].onload = function() {
-			ctx.drawImage(images[20*i+j], i * 25, j * 25, 25, 25);
+		images[columns*i+j] = new Image();
+		images[columns*i+j].src = getSource(i, j);
+		images[columns*i+j].onload = function() {
+			ctx.drawImage(images[columns*i+j], i * tWidth, j * tHeight, tWidth, tHeight);
 		}
 	}
 
 	function multidraw() {
-		for (var i = 0; i < 20; i++) {
-			for (var j = 0; j < 20; j++) {
+		for (var i = 0; i < columns; i++) {
+			for (var j = 0; j < rows; j++) {
 				draw(i, j);
 			}
 		}
 		var canvas = document.getElementById("mycanvas");
-		canvas.width = 500;
-		canvas.height = 500;
+		canvas.width = width;
+		canvas.height = height;
 		canvas.onmousemove = function onmousemove(e) {
 			var ctx = canvas.getContext("2d");
 			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
 			var mx = e.pageX - canvas.offsetLeft;
 			var my = e.pageY - canvas.offsetTop;
-			var i = Math.floor(mx/25);
-			var j = Math.floor(my/25);
-			if (prev_i != i || prev_j != j && 0 < prev_i && prev_i < 20 && 0 < prev_j && prev_j < 20) {
-				ctx.clearRect(25*prev_i, 25*prev_j, 25, 25);
-				ctx.drawImage(images[20*prev_i+prev_j], prev_i * 25, prev_j * 25, 25, 25);
-				ctx.fillRect(25*i, 25*j, 25, 25);
+			var i = Math.floor(mx/tWidth);
+			var j = Math.floor(my/tHeight);
+			if (prev_i != i || prev_j != j) {
+				ctx.drawImage(images[columns*prev_i+prev_j], prev_i * tWidth, prev_j * tHeight, tWidth, tHeight);
+				ctx.fillRect(tWidth*i, tHeight*j, tWidth, tHeight);
 				prev_i = i;
 				prev_j = j;
 			}
+		canvas.onmouseout = function onmouseout(e) {
+			var ctx = canvas.getContext("2d");
+			var mx = e.pageX - canvas.offsetLeft;
+			var my = e.pageY - canvas.offsetTop;
+			var i = Math.floor(mx/tWidth);
+			var j = Math.floor(my/tHeight);
+			ctx.drawImage(images[columns*prev_i+prev_j], prev_i * tWidth, prev_j * tHeight, tWidth, tHeight);
+		}
 		}
 	}
 	</script>
