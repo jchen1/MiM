@@ -161,9 +161,9 @@ var Photo = function() {
 		});
 
 
-	req.on('error', function(e) {
-		console.log('error: ' + e.message);
-	});
+		req.on('error', function(e) {
+			console.log('error: ' + e.message);
+		});
 	}
 
 	var _storeBigImage = function(photo, pixels) {
@@ -233,6 +233,7 @@ var Photo = function() {
 		var avgColor = _average(photo, 0, 0, width, height);
 		return avgColor;
 	}
+
 	var _average = function(photo, x, y, width, height) {
 		var total = 0;
 		for(var j = y; j < y + height; j++){
@@ -271,7 +272,7 @@ var Photo = function() {
 		});
 
 
-	req.on('error', function(e) {
+		req.on('error', function(e) {
 			console.log('error: ' + e.message);
 		});
 	}
