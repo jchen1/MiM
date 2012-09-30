@@ -5,11 +5,13 @@
 	<title>Canvas test</title>
 	<script type="text/javascript">
 	var images = new Array(400);
+	var prev_i = 1;
+	var prev_j = 1;
 	function draw(i, j) {
 		var canvas = document.getElementById("mycanvas");
 		var ctx = canvas.getContext("2d");
 		images[20*i+j] = new Image();
-		images[20*i+j].src = 'http://lorempixel.com/75/75/' + '?' + (20*i+j);
+		images[20*i+j].src = 'http://lorempixel.com/25/25/' + '?' + (20*i+j);
 		images[20*i+j].onload = function() {
 			ctx.drawImage(images[20*i+j], i * 25, j * 25, 25, 25);
 		}
@@ -21,11 +23,29 @@
 				draw(i, j);
 			}
 		}
+		var canvas = document.getElementById("mycanvas");
+		canvas.width = 500;
+		canvas.height = 500;
+		canvas.onmousemove = function onmousemove(e) {
+			var ctx = canvas.getContext("2d");
+			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+			var mx = e.pageX - canvas.offsetLeft;
+			var my = e.pageY - canvas.offsetTop;
+			var i = Math.floor(mx/25);
+			var j = Math.floor(my/25);
+			if (prev_i != i || prev_j != j && 0 < prev_i && prev_i < 20 && 0 < prev_j && prev_j < 20) {
+				ctx.clearRect(25*prev_i, 25*prev_j, 25, 25);
+				ctx.drawImage(images[20*prev_i+prev_j], prev_i * 25, prev_j * 25, 25, 25);
+				ctx.fillRect(25*i, 25*j, 25, 25);
+				prev_i = i;
+				prev_j = j;
+			}
+		}
 	}
 	</script>
 </head>
 <body>
-	<canvas id="mycanvas" width="500" height="500" style="border: 6px solid black;"></canvas>
+	<canvas id="mycanvas"></canvas>
 	<script>multidraw()</script>
 </body>
 </html>
