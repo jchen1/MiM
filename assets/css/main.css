@@ -1,0 +1,54 @@
+body {
+  padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+  background-image: url("../img/bright_squares.png");
+}
+
+.navbar-fixed-top {
+  -webkit-box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
+  -o-box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
+  box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
+}
+
+.navbar-inverse .navbar-inner {
+  background: -webkit-linear-gradient(top, #0079a6, #00607f);
+  background: -moz-linear-gradient(top, #0079a6, #00607f);
+  background: -o-linear-gradient(top, #0079a6, #00607f);
+  border: none;
+}
+
+.navbar-inverse .nav .active > a, .navbar-inverse .nav .active > a:hover, .navbar-inverse .nav .active > a:focus {
+  background: -webkit-linear-gradient(top, #0079a6, #00607f);
+  color: #fff;
+}
+
+.navbar-inverse .brand, .navbar-inverse .nav > li > a {
+  color: white;
+  text-shadow: -1px -1px 0px black;
+  font-family: Museo-500;
+  font-size: 25px;
+}
+
+.navbar-inverse .brand:hover, .navbar-inverse .nav > li > a:hover {
+  color: #EEE;
+  text-shadow: 1px 1px 0px black;
+}
+
+#searchbox {
+  height: 30px;
+  width: 70%;
+  font-size: 25px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+}
+#searchbutton {
+  width: 20%;
+  height: 40px;
+  font-size: 25px;
+}
+#bgimage {
+  margin: auto;
+  display: block;
+}

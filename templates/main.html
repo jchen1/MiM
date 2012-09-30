@@ -11,62 +11,7 @@
     <!-- Le styles -->
     <link href="../assets/css/bootstrap.css" rel="stylesheet">
     <link href="../assets/css/Museo.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-        background: url(../assets/img/random_grey_variations.png);
-      }
-      .navbar-fixed-top {
-        -webkit-box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
-        -moz-box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
-        -o-box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
-        box-shadow: 0em 0.1em 1em rgba(0, 0, 0, 0.3);
-      }
-      .navbar-inverse .navbar-inner {
-        background: -webkit-linear-gradient(top, #0079a6, #00607f);
-        background: -moz-linear-gradient(top, #0079a6, #00607f);
-        background: -o-linear-gradient(top, #0079a6, #00607f);
-        border: none;
-      }
-      .navbar-inverse .nav .active > a, .navbar-inverse .nav .active > a:hover, .navbar-inverse .nav .active > a:focus {
-        background: -webkit-linear-gradient(top, #0079a6, #00607f);
-        color: #fff;
-      }
-
-      .navbar-inverse .brand, .navbar-inverse .nav > li > a {
-        color: white;
-        text-shadow: -1px -1px 0px black;
-        font-family: Museo-500;
-        font-size: 25px;
-      }
-      .navbar-inverse .brand:hover, .navbar-inverse .nav > li > a:hover {
-        color: #EEE;
-        text-shadow: 1px 1px 0px black;
-      }
-
-      #searchbox {
-        height: 30px;
-        width: 70%;
-        font-size: 25px;
-        -webkit-border-radius: 5px;
-        -moz-border-radius: 5px;
-        -o-border-radius: 5px;
-        border-radius: 5px;
-        -webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.075);
-        -moz-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.075);
-        -o-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.075);
-        box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.075);
-      }
-      #searchbutton {
-        width: 20%;
-        height: 40px;
-        font-size: 25px;
-      }
-      #bgimage {
-        margin: auto;
-        display: block;
-      }
-    </style>
+    <link href="../assets/css/main.css" rel="stylesheet">
     <link href="../assets/css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -107,7 +52,7 @@
     <div class="container">
       <div class="row">
         <form class="form-search" style="text-align: center;">
-          <input type="text" class="input-medium search-query" id="searchbox" />
+          <input type="text" class="input-medium search-query" id="searchbox" placeholder="example: #dogs" />
           <button type="submit" class="btn btn-primary" id="searchbutton">Search</button>
         </form>
       </div>
