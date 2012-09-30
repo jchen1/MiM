@@ -6,6 +6,6 @@ var tumblr = require("./tumblr");
 var handle = {}
 handle["/"] = requestHandlers.start;
 handle["/start"] = requestHandlers.start;
-handle["/pull"] = tumblr.pull;
+handle["/tagged"] = tumblr.tagged;
 
 server.start(router.route, handle);
