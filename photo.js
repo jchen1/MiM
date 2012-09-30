@@ -339,7 +339,8 @@ var Photo = function() {
 
 	var _match = function(photo) {
 		var arrayOfTiles = photo.tiles;
-		doMatching(partitionedBigImage, arrayOfTiles);
+		var partitionedBigImage = _getColorBig(photo, photo.width, photo.height);
+		return doMatching(partitionedBigImage, arrayOfTiles);
 	}
 
 	self.on("newURLPhoto", self.initTagged);
