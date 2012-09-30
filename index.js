@@ -14,6 +14,23 @@ path = require("path"),
 fs = require("fs"),
 events = require("events");
 
+function endBigImageResponse() {
+
+}
+
+function handleBigImageResponse(response) {
+	response.setEncoding('binary');
+	response.addListener('end', endBigImageResponse);
+}
+
+function downloadBigImage(link) {
+	var host = url.parse(link).hostname;
+	var filename = "tmp/" + url.parse(link).pathname.split('/').pop();
+	var theUrl = http.createClient(80, host);
+	var request = theUrl.request('GET', link, {"host": host});
+	request.end();
+	request.addListener('response', function(){ handleBigImageResponse(response) });
+}
 
 function bigImageProcess(imageurl, callback){
     var downloadfile = "http://24.media.tumblr.com/tumblr_mb4qh0ZU1j1r0wqrdo1_500.png";
@@ -140,8 +157,44 @@ function smallImageProcess(imageurl, callback){
 }
 //end small image process
 
+function squared(thing) {
+	return thing * thing;
+}
 
+function calcTolerance(source, target) {
+	// source is array of R, G, B
+	// target is array of R, G, B
+	return squared(Math.abs(source[0] - target[0])) + squared(Math.abs(source[1] - target[1])) + squared(Math.abs(source[2] - target[2]));
+}
 
+function doMatching(bigImageArray, tileurls) {
+	// bigImageArray is the result of bigImageProcess
+	// tileurls is an array of tile urls
+	var tolerances = new Array();
+
+	// tolerances[tile number][region number] = the tolerance
+	for (var i = 0; i < tileurls.length; i++) {
+		tolerances[i] = new Array();
+		smallImageProcess(tileurls[i], function(err, tilearray) {
+			for (var j = 0; j < bigImageArray.length / 3; j++) {
+				var region = bigImageArray.slice(3 * j, 3 * j + 3);
+				tolerances[i][j] = calcTolerance(tilearray, region);
+			}
+		});
+	}
+
+	// loop through tolerances for each region, find the smallest one.
+	var minimum_tolerance = new Array();
+	// minimum_tolerance[region number] = tile number with least tolerance
+	for (var regionnum = 0; regionnum < bigImageArray.length / 3; regionnum++) {
+		for (var tilenum = 0; tilenum < tolerances.length; tilenum++) {
+			if (minimum_tolerance[regionnum] === undefined || tolerances[tilenum][regionnum] < minimum_tolerance[regionnum]) {
+				minimum_tolerance[regionnum] = tilenum;
+			}
+		}
+	}
+	return minimum_tolerance; // or callback/emit or whatever the shit node.js does
+}
 
 /*
 function quadSummary(imageurl, callback){
