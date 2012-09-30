@@ -7,16 +7,17 @@ var querystring = require("querystring");
 
 var Photo = function() {
 	var self = this;
+	var lastlength = 0;
 	events.EventEmitter.call(self);
 
 	self.initTagged = function(tag) {
-		var photo = {tag:tag, data:[], timestamp:0, tags:[], url:'', post_url:'', similar:[]};
+		var photo = {tag:tag, data:[], timestamp:0, tags:[], url:'', post_url:'', tiles:[]};
 		console.log("newTaggedPhoto");
 		self.emit("newTaggedPhoto", photo, 1);
 	}
 /*
 	self.initURL = function(link) {
-		var photo = {tag:'', timestamp:0, tags:[], url:'', post_url:link, similar:[]};
+		var photo = {tag:'', timestamp:0, tags:[], url:'', post_url:link, tiles:[]};
 
 		var host = photo.post_url.replace('http://', '').split('/')[0];
 		var pathName = url.parse(photo.post_url).pathname;
@@ -69,7 +70,7 @@ var Photo = function() {
 
 		var options = {
 			host: 'api.tumblr.com',
-			path: '/v2/tagged?tag=' + photo.tag + '&api_key=' + key + '&before=' + (photo.similar.length === 0 ? photo.timestamp: photo.similar[photo.similar.length - 1].timestamp) + '&limit=' + limit
+			path: '/v2/tagged?tag=' + photo.tag + '&api_key=' + key + '&before=' + (photo.tiles.length === 0 ? photo.timestamp: photo.tiles[photo.tiles.length - 1].timestamp) + '&limit=' + limit
 		};
 		var req = http.get(options, function(res)
 		{
@@ -140,17 +141,25 @@ var Photo = function() {
 				}
 				simpic.url = JSONData.response[i].photos[0].alt_sizes[min].url;
 				simpic.data = []; //hi rolando
-				photo.similar[photo.similar.length] = simpic;
+				photo.tiles[photo.tiles.length] = simpic;
 			}
 		}
-		console.log("parsedSmall");
+		console.log("parsedSmall " + photo.tiles.length);
 		self.emit("parsedSmall", photo);
 		
 	}
 
 	var _mosaic = function(photo) {
 		console.log("mosaiced");
-		self.emit("mosaiced", photo);
+		if (photo.tiles.length < 400 && lastlength != photo.tiles.length)
+		{
+			lastlength = photo.tiles.length;
+			self.emit("moreTiles", photo, 20);
+		}
+		else
+		{
+			self.emit("mosaiced", photo);
+		}
 	}
 
 	var _success = function(photo) {
@@ -164,6 +173,7 @@ var Photo = function() {
 	self.on("parsedBig", _pull);
 	self.on("s_pulledSmall", _parseSmall);
 	self.on("parsedSmall", _mosaic);
+	self.on("moreTiles", _pull);
 	self.on("mosaiced", _success);
 
 }
