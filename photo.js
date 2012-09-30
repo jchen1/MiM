@@ -79,6 +79,7 @@ var Photo = function() {
 		if (typeof photo.tag == "undefined") photo.tag = 'dog';
 
 		photo.tag = photo.tag.replace(/"/g, '');
+		photo.tag = photo.tag.replace('#', '');
 
 		var options = {
 			host: 'api.tumblr.com',

@@ -249,6 +249,7 @@ var handle = {}
 //handle["/"] = requestHandlers.start;
 handle["/start"] = requestHandlers.start;
 handle["/tagged"] = tumblr.tagged;
+handle["/urlpost"] = tumblr.urlpost;
 
 
 
