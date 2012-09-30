@@ -1,3 +1,16 @@
+var static = require('node-static');
+var file = new(static.Server);
+
+require('http').createServer(function(request, response) {
+    request.addListener('end', function() {
+	fileName = '.' + request.url;
+	if (fileName == './')
+	    file.serveFile('./templates/main.html', 200, {}, request, response);
+	else if (fileName.substr(0, 8) == './assets')
+	    file.serve(request, response);
+    });
+}).listen(8080);
+
 var server = require("./server");
 var router = require("./router");
 var requestHandlers = require("./requestHandlers");
@@ -78,11 +91,10 @@ function bigImageProcess(imageurl, callback){
 			try {
 			    PNG.decode(filename, function(pixels){
 				pixelbuffer = pixels;
-				    //for(var i = 0; i < size.width/2*size.height/2; i++){ unnecessary for loopzzz$$zz
+				//for(var i = 0; i < size.width/2*size.height/2; i++){ unnecessary for loopzzz$$zz
 				//console.log(pixels[i]); unnecessarrryyyyyy
 				callback(null, pixels); //<<---- that shit returns the pixel array of the big image
-			    }
-				      });
+				});
 		    }
 			   catch( err ) {
 			       console.log('error: '+err)
@@ -144,7 +156,6 @@ function smallImageProcess(imageurl, callback){
 				    //for(var i = 0; i < size.width/2*size.height/2; i++){
 				//console.log(pixels[i]);
 				callback(null, pixels);
-			    }
 				      });
 		    }
 			   catch( err ) {
@@ -239,10 +250,9 @@ http.createServer(function (req, res) {
 }).listen(9000);
 
 var handle = {}
-
-handle["/"] = requestHandlers.start;
+//handle["/"] = requestHandlers.start;
 handle["/start"] = requestHandlers.start;
-handle["/pull"] = tumblr.pull;
+handle["/tagged"] = tumblr.tagged;
 
 
 
