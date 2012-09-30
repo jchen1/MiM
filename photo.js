@@ -222,8 +222,10 @@ var Photo = function() {
 		
 		for(var y = 0; y < tilesDown; y = y + tHeight){
 			for(var x = 0; x < tilesRight; x = x + tWidth){
-				avgColors[c] = _average(photo, x, y, width, height); //idk look up array specs
-				c++;
+			    avgColors[c] = _average(photo, x, y, width, height, 0);
+			    avgColors[c + 1] = _average(photo, x, y, width, height, 1);
+			    avgColors[c + 2] = _average(photo, x, y, width, hight, 2);
+				c+=3;
 			}
 		}
 		return avgColors;
@@ -233,11 +235,11 @@ var Photo = function() {
 		var avgColor = _average(photo, 0, 0, width, height);
 		return avgColor;
 	}
-	var _average = function(photo, x, y, width, height) {
+        var _average = function(photo, x, y, width, height, offset)  {
 		var total = 0;
 		for(var j = y; j < y + height; j++){
 			for(var i= x; i < x + width; i++){
-				total = total + photo.tiles[j * width + i].data[j * width + i];
+			    total = total + photo.tiles[j * width + i].data[3 * (j * width + i) + offset];
 			}
 		}
 		return (total/(width*height));
