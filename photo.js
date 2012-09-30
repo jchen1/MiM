@@ -114,21 +114,18 @@ var Photo = function() {
 			photo.timestamp = json.timestamp;
 			photo.data = []; //hi rolando
 			console.log("parsedBig 20");
-			self.emit("parsedBig", photo, function(pixels)
-			{
-				photo.data = pixels;
-			});
+			self.emit("s_parsedBig", photo);
 			console.log(photo.data.length);
 		}
 		else
 		{
 			photo.timestamp = json.timestamp - 1;
 			console.log("parsedBig 1");
-			//self.emit("parsedBig", photo);
+			self.emit("f_parsedBig", photo, 1);
 		}
 	}
 
-	var _downloadBig = function(photo, callback) {
+	var _downloadBig = function(photo) {
 		photo.url = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png';
 
 		var fileName = 'tmp/'+url.parse(photo.url).pathname.split('/').pop();
@@ -167,7 +164,7 @@ var Photo = function() {
 
 	var _storeBigImage = function(photo, pixels) {
 		photo.data = pixels;
-		
+		self.emit("storedBigImage", photo, 20);
 	}
 
 	var _parseSmall = function(photo, data) {
@@ -217,12 +214,14 @@ var Photo = function() {
 	self.on("newURLPhoto", self.initTagged);
 	self.on("newTaggedPhoto", _pull);
 	self.on("s_pulledBig", _parseBig);
-	self.on("parsedBig", _downloadBig);
+	self.on("s_parsedBig", _downloadBig);
+	self.on("f_parsedBig", _pull);
 	self.on("s_pulledSmall", _parseSmall);
 	self.on("parsedSmall", _mosaic);
 	self.on("moreTiles", _pull);
 	self.on("mosaiced", _success);
 	self.on("downloadedBig", _storeBigImage);
+	self.on("storedBigImage", _pull);
 
 }
 
