@@ -14,7 +14,10 @@ app.get(/^\/.*$/, function(request, response) {
     });
 });
 app.post('/', function (request, response) {
-    tumblr.tagged(response, request.param("tag", null));
+	if (request.param("post"), null.indexOf('#') == 0)
+    	tumblr.tagged(response, request.param("post", null));
+    else
+    	tumblr.urlpost(response, request.param("post", null));
 });
 app.listen(8080);
 
