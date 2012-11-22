@@ -4,13 +4,16 @@
   "scripts": {
     "start": "index.js"
   },
-  "version": "0.0.1-45",
+  "version": "0.0.1-60",
   "engines": {
     "node": "0.8.x"
   },
   "dependencies": {
     "connect": "2.5.x",
     "node-static": "0.6.x",
-    "express": ">= 3.x"
+    "express": ">= 3.x",
+    "png-js": "0.1.x",
+    "gm": "1.5.x",
+    "canvas": "0.13.x"
   }
 }

@@ -100,20 +100,19 @@
           <a class="brand" href="/">Mozaic</a>
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
-              <li><a href="#about">i</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
+              <li><a href="#" class="tooltip-class" rel="tooltip" data-placement="bottom" data-original-title="about">i</a></li>
+	    </ul>
+	  </div>
+	</div>
       </div>
     </div>
-
     <div class="container">
       <div class="row">
-        <div class="instructions">
-          <label style="width: 70%; margin: auto;">Search by <b>#tag</b> or <b>image link</b> below:</label>
-        </div>
-        <form class="form-search" style="text-align: center;" action="/" method="POST">
-          <input type="text" class="input-medium search-query" id="searchbox" name="tag" placeholder="example: #dogs or http://jjustin.tumblr.com/post/32535029858" />
+        <form style="margin:auto;width:600px" action="/submit" method="POST">
+          <label>Search by <strong>#tag</strong> or <strong>image link</strong> below:</label>
+	  <div class="input-append">
+            <input type="text" class="input-xxlarge" id="searchbox" name="q" placeholder="example: #dogs or http://jjustin.tumblr.com/post/32535029858"><button class="btn" type="submit">Go!</button>
+	  </div>
         </form>
       </div>
       <div class="row">
@@ -127,6 +126,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="../assets/js/jquery-1.8.2.min.js"></script>
+    <script src="../assets/js/bootstrap-tooltip.js"></script>
     <!--<script src="../assets/js/bootstrap-transition.js"></script>
     <script src="../assets/js/bootstrap-alert.js"></script>
     <script src="../assets/js/bootstrap-modal.js"></script>
@@ -139,6 +139,18 @@
     <script src="../assets/js/bootstrap-collapse.js"></script>
     <script src="../assets/js/bootstrap-carousel.js"></script>
     <script src="../assets/js/bootstrap-typeahead.js"></script>-->
+
+	<script>
+	  $(function() {
+	    $(".tooltip-class").tooltip();
+	    $("form").submit(function() {
+	      $.post($(this).attr('action'), $(this).serialize(), function(json) {
+	        alert(json);
+              }, 'json');
+	      return false;
+	    });
+	  });
+	</script>
 
   </body>
 </html>
