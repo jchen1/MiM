@@ -4,7 +4,6 @@
  */
 
 var key = "KloQFw7b0NkGEPsbHPBdlnz2VbA76Zmo555EghQ4ru2PpizJqV";
-var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 
 /*
