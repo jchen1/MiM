@@ -17,37 +17,39 @@ var Photo = function(request, size) {
 	if (request.search("http://") != -1 && request.search("tumblr.com") != -1)
 	{
 		console.log("URL request recieved: " + request);
-		this.emit("req_URL");
+		self.emit("req_URL");
 	}
 	else if (request.search("^[a-zA-Z0-9#]+$") != -1)
 	{
 		console.log("Tag request recieved: " + request);
-		this.emit("req_tag", request);
+		self.emit("req_tag", request);
 	}
 	else
 	{
 		console.log("Error: bad request");
-		this.emit("req_bad", request);
+		self.emit("req_bad", request);
 	}
 
 	//Gets the first photo tagged with $tag
 	function initTag(tag) {
-		this.emit("init", link);
+		self.tag = tag;
+		self.emit("init", link);
 	}
 
-	//Gets the photo at the URL given
+	//Gets the photo at the URL given.
+	//URL must be a tumblr post, not direct link to picture
 	function initURL(url) {
-		this.emit("init", link);
+		self.emit("init", link);
 	}
 
 	//Downloads picture from $link and stores in this.data[]
 	function download(link) {
-		this.emit("download");
+		self.emit("download");
 	}
 
 	//Scales the image
 	function scale() {
-		this.emit("success");
+		self.emit("success");
 	}
 
 	//this.url
