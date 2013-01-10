@@ -14,13 +14,16 @@ app.get(/^\/.*$/, function(request, response) {
     });
 });
 
-var tumblr = require("./tumblr");
+var Photo = require('./photo');
+//var photo = require("./photo");
 
 app.post('/submit', function (request, response) {
     var q = request.param("q", null);
+    var big = new Photo(q, 0);
+    /*
     if (q.charAt(0) == '#')
 	tumblr.tagged(response, q);
     else
-	tumblr.urlpost(response, q);
+	tumblr.urlpost(response, q);*/
 });
 app.listen(8080);

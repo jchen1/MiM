@@ -1,6 +1,5 @@
-var photo = require("./photo");
-
 function tagged(response, tag) {
+	var photo = require("./photo");
 	photo.initTagged(tag);
 	//photo.initURL('http://sharkinthedungeon.tumblr.com/post/32415676873/its-like-i-broke-up-with-obama-and-hes-not');
 	
@@ -24,6 +23,7 @@ function tagged(response, tag) {
 }
 
 function urlpost(response, url) {
+	var photo = require("./photo");
 	photo.initURL(url);
 
 	photo.on("success", function(photo)
