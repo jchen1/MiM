@@ -7,9 +7,12 @@ var key = "KloQFw7b0NkGEPsbHPBdlnz2VbA76Zmo555EghQ4ru2PpizJqV";
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 
-
+/*
+ * Note: photo returned will be square. 
+ */
 var Photo = function(request, size) {
 	self = this;
+	self.size = size;
 
 	if (request.search("http://") != -1 && request.search("tumblr.com") != -1)
 	{
@@ -27,12 +30,24 @@ var Photo = function(request, size) {
 		this.emit("req_bad", request);
 	}
 
+	//Gets the first photo tagged with $tag
 	function initTag(tag) {
-		
+		this.emit("init", link);
 	}
 
+	//Gets the photo at the URL given
 	function initURL(url) {
+		this.emit("init", link);
+	}
 
+	//Downloads picture from $link and stores in this.data[]
+	function download(link) {
+		this.emit("download");
+	}
+
+	//Scales the image
+	function scale() {
+		this.emit("success");
 	}
 
 	//this.url
@@ -42,6 +57,8 @@ var Photo = function(request, size) {
 
 	self.on("req_URL", initURL);
 	self.on("req_tag", initTag);
+	self.on("init", download);
+	self.on("download", scale);
 
 };
 
